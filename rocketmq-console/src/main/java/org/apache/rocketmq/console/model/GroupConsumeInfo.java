@@ -19,13 +19,16 @@ package org.apache.rocketmq.console.model;
 import org.apache.rocketmq.common.protocol.heartbeat.ConsumeType;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 
+// TODO-QIU: 2024年3月29日, 0029
 public class GroupConsumeInfo implements Comparable<GroupConsumeInfo> {
     private String group;
     private String version;
+    // TPS
     private int count;
     private ConsumeType consumeType;
     private MessageModel messageModel;
     private int consumeTps;
+    // 延迟
     private long diffTotal = -1;
 
     public String getGroup() {
@@ -70,10 +73,12 @@ public class GroupConsumeInfo implements Comparable<GroupConsumeInfo> {
 
     @Override
     public int compareTo(GroupConsumeInfo o) {
+        // tps
         if (this.count != o.count) {
             return o.count - this.count;
         }
 
+        // 延迟，消息挤压
         return (int) (o.diffTotal - diffTotal);
     }
 

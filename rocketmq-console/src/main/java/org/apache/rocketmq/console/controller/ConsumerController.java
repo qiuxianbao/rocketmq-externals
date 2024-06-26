@@ -43,6 +43,8 @@ public class ConsumerController {
     @Resource
     private ConsumerService consumerService;
 
+    // TODO-QIU: 2024年3月29日, 0029
+    // dashboard 消费者（数量、TPS、延迟）
     @RequestMapping(value = "/groupList.query")
     @ResponseBody
     public Object list() {

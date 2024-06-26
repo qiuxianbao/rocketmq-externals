@@ -63,13 +63,47 @@ import static com.google.common.base.Throwables.propagate;
 public class ConsumerServiceImpl extends AbstractCommonService implements ConsumerService {
     private Logger logger = LoggerFactory.getLogger(ConsumerServiceImpl.class);
 
+    // TODO-QIU: 2024年3月29日, 0029
     @Override
     @MultiMQAdminCmdMethod
     public List<GroupConsumeInfo> queryGroupList() {
         Set<String> consumerGroupSet = Sets.newHashSet();
         try {
+            // 获取集群的 broker 信息，主要是通过向 NameServer 发送 GET_BROKER_CLUSTER_INFO 请求，
+            // NameServer 返回集群包含的所有 broker 信息
+
+            /**
+             * {
+             * 	"brokerAddrTable": {
+             * 		"broker-a": {
+             * 			"cluster": "DefaultCluster",
+             * 			"brokerName": "broker-a",
+             * 			"brokerAddrs": {
+             * 				"0": "192.168.0.168:10911",
+             * 				"1": "192.168.0.169:10911"
+             *                        }* 		},
+             * 		"broker-b": {
+             * 			"cluster": "DefaultCluster",
+             * 			"brokerName": "broker-b",
+             * 			"brokerAddrs": {
+             * 				"0": "192.168.0.170:10911",
+             * 				"1": "192.168.1.171:10911"
+             * 			}
+             * 		},
+             * 		"clusterAddrTable": {
+             * 			"DefaultCluster": [
+             * 				"broker-a",
+             * 				"broker-b"
+             * 			]
+             * 		}
+             * 	}
+             * }
+             */
+            // RequestCode.GET_BROKER_CLUSTER_INFO
             ClusterInfo clusterInfo = mqAdminExt.examineBrokerClusterInfo();
             for (BrokerData brokerData : clusterInfo.getBrokerAddrTable().values()) {
+                // 向集群中的主节点获取所有的订阅关系
+                // brokerData.selectBrokerAddr() == MixAll.MASTER_ID
                 SubscriptionGroupWrapper subscriptionGroupWrapper = mqAdminExt.getAllSubscriptionGroup(brokerData.selectBrokerAddr(), 3000L);
                 consumerGroupSet.addAll(subscriptionGroupWrapper.getSubscriptionGroupTable().keySet());
             }
@@ -85,6 +119,7 @@ public class ConsumerServiceImpl extends AbstractCommonService implements Consum
         return groupConsumeInfoList;
     }
 
+    // TODO-QIU: 2024年3月29日, 0029
     @Override
     @MultiMQAdminCmdMethod
     public GroupConsumeInfo queryGroup(String consumerGroup) {
@@ -92,6 +127,7 @@ public class ConsumerServiceImpl extends AbstractCommonService implements Consum
         try {
             ConsumeStats consumeStats = null;
             try {
+                // console 的 dashboard 数据来源，RequestCode.GET_CONSUME_STATS,
                 consumeStats = mqAdminExt.examineConsumeStats(consumerGroup);
             }
             catch (Exception e) {

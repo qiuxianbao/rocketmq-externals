@@ -20,7 +20,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@EnableAutoConfiguration
+// TODO-QIU: 2024年3月29日, 0029
+//@EnableAutoConfiguration
 @SpringBootApplication
 public class App {
 
